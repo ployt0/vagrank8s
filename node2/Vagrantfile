@@ -1,0 +1,25 @@
+load "../constants.rb"
+node_name = "node2"
+NODE2_IP = "192.168.68.12"
+
+Vagrant.configure("2") do |config|
+  config.vm.box = "ubuntu/focal64"
+  config.vm.box_version = LOCKED_BOX_VERSION
+  config.vm.box_check_update = false
+  config.vm.hostname = node_name
+  config.vm.network :private_network, ip: NODE2_IP
+  config.vm.provider "virtualbox" do |vb|
+   vb.memory = "1536"
+  end
+
+  config.vm.provision "shell", path: "../provision_kube_node.sh", args: NODE2_IP
+  config.vm.provision "file", source: "../master/join.sh", destination: "/home/vagrant/join.sh"
+  config.vm.provision "shell", privileged: false, inline: <<-SHELL
+    cmd=$(cat /home/vagrant/join.sh)
+    sudo $cmd
+
+    echo 'source <(kubectl completion bash)' >>/home/vagrant/.bashrc
+    echo 'alias k=kubectl' >>/home/vagrant/.bashrc
+    echo 'complete -F __start_kubectl k' >>/home/vagrant/.bashrc
+  SHELL
+end
