@@ -15,15 +15,24 @@ Spin up the master first, then the (2) nodes:
 ## Regression Tests
 
 This is the code as I was running it manually, and locally, on my own VMs.
-It's now mostly automated in github actions so can be seen running without
-needing to escape it beyond recognition. Some things were better left for
-manual invocation and observation.
+It's now mostly automated in github actions where it has been escaped almost
+beyond recognition and still won't work. *Some things were better left for
+manual invocation and observation.*
 
-It's nice to see Github giving free server resources to public projects. I
-could go crazy on these tests if I don't stop here.
+Why it won't work on github is because of a lack of nested virtualisation:
 
-Though it isn't mentioned here, as far as possible without access to the
-`kubectl` server, commands run directly on the node should be transferable to
+> Stderr: VBoxManage: error: VT-x is not available (VERR_VMX_NO_VMX)
+
+At least the attempt at automation has streamlined manual testing, I suppose.
+
+These tests should all work and be performed when evaluating changes.
+I've given them in script form as a concession towards eventual automation.
+We have the vagrants so there's not a resource issue, running locally.
+
+For reasons of clarity, time, and the expressiveness of natural language,
+the tests shall remain minimally automated, as part of this readme. Though
+it isn't mentioned here, as far as possible without access to the `kubectl`
+server, commands run directly on the node should be transferable to
 all nodes to prove bi-directional interoperability.
 
 
