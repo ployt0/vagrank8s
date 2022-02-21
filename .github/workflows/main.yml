@@ -1,21 +1,22 @@
-# This is a basic workflow to help you get started with Actions
+# This is currently broken. GitHub workflows don't support nested
+# virtualisation so the manual tests can never work on their cloud VMs.
+# Either provide your own on-prem test runner, test manually, or wait
+# for another version of the tests where the test runners *are* the K8S nodes.
 
 name: CI
 
 on:
+# disabling automatic running with commenting here:
 #  push:
 #    branches: [ master ]
 
   # Allows you to run this workflow manually from the Actions tab
   workflow_dispatch:
 
-# A workflow run is made up of one or more jobs that can run sequentially or in parallel
 jobs:
   build:
-    # The type of runner that the job will run on
     runs-on: ubuntu-latest
 
-    # Steps represent a sequence of tasks that will be executed as part of the job
     steps:
       # Checks-out your repository under $GITHUB_WORKSPACE, so your job can access it
       - uses: actions/checkout@v2

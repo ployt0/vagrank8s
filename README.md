@@ -15,26 +15,38 @@ Spin up the master first, then the (2) nodes:
 ## Regression Tests
 
 This is the code as I was running it manually, and locally, on my own VMs.
-It's now mostly automated in github actions where it has been escaped almost
-beyond recognition and still won't work. *Some things were better left for
+These tests should all work and be performed when evaluating changes.
+I've given them in script form as a concession towards eventual automation.
+
+
+### GitHub Workflow
+
+In an attempt to automate testing with GitHub, the code has been escaped almost
+beyond recognition and still won't work. *Some things are better left for
 manual invocation and observation.*
 
-Why it won't work on github is because of a lack of nested virtualisation:
+Why it won't work on GitHub is because of a lack of nested virtualisation:
 
 > Stderr: VBoxManage: error: VT-x is not available (VERR_VMX_NO_VMX)
 
 At least the attempt at automation has streamlined manual testing, I suppose.
 
-These tests should all work and be performed when evaluating changes.
-I've given them in script form as a concession towards eventual automation.
-We have the vagrants so there's not a resource issue, running locally.
+
+### Testing Locally
+
+We have the Vagrant VMs so there's not a resource issue, running locally.
 
 For reasons of clarity, time, and the expressiveness of natural language,
-the tests shall remain minimally automated, as part of this readme. Though
-it isn't mentioned here, as far as possible without access to the `kubectl`
-server, commands run directly on the node should be transferable to
-all nodes to prove bi-directional interoperability.
+the tests below shall remain minimally automated. Provisioning our nodes still
+requires a few commands in the terminal so is not, completely, automated. The
+provisioning scripts could be made to fail if these tests fail, but that isn't
+the job of provisioning. It would then become too easy to ignore the features
+we are testing and failing tests would fail provisioning but our VMs would still
+be up, and require inconvenient rolling back to fix and repeat the tests.
 
+Though it isn't mentioned here, as far as is possible without access to the
+`kubectl` server, commands run directly on the node should be transferable to
+all nodes to prove bi-directional interoperability.
 
 
 ### An Echo Service
@@ -58,7 +70,7 @@ svc_ip=`k get svc hello-node -o=custom-columns=CLUSTER-IP:.spec.clusterIP | tail
 ping -c3 -W2 $pod1_ip
 ping -c3 -W2 $pod2_ip
 host_collection=""
-for i in {1..10}; do
+for i in {1..20}; do
   hosty=($(curl -s $svc_ip:8080 | grep Hostname))
   host_collection+=" ${hosty[1]}"
 done
@@ -110,7 +122,7 @@ done
 ```
 
 
-### Network A Pod Sees
+### Network From a Pod's POV
 
 Get a disposable pod:
 
@@ -122,20 +134,20 @@ Check its IP with `ip a`. That's in the hosting node's subnet.
 
 Check can ping pods and curl services in other subnets, on other nodes.
 
-Automating with busyboxplus "worked" once:
+Automating with `busyboxplus` "worked" once:
 ```shell
-kubectl run curl-myone --image=radial/busyboxplus:curl -ti --rm -- sh -c "curl 10.244.1.2:8080"
+kubectl run curl-myone --image=radial/busyboxplus:curl -ti --rm -- sh -c "curl $svc_ip:8080"
 ```
 But don't use it because it will forever after moan about:
 `Internal error occurred: error attaching to container: container is in CONTAINER_EXITED state`
 
 
-Instead we can use shell-demo1 from before:
+Instead, we can use `shell-demo1` from before:
 
 ```shell
 kubectl exec -ti shell-demo1 -- /bin/bash -c "curl $svc_ip:8080"
 host_collection=""
-for i in {1..10}; do
+for i in {1..20}; do
   hosty=($(kubectl exec -ti shell-demo1 -- /bin/bash -c "curl $svc_ip:8080" | grep Hostname))
   host_collection+=" ${hosty[1]}"
 done
